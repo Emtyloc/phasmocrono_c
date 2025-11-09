@@ -39,26 +39,33 @@ jobs:
 
   windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install MinGW-w64
-        run: choco install w64devkit -y
-
-      - name: Download Raylib precompiled
+      - name: Download and Install W64Devkit
+        run: |
+          powershell -Command "Invoke-WebRequest -Uri 'https://github.com/skeeto/w64devkit/releases/download/v2.4.0/w64devkit-x86-2.4.0.7z.exe' -OutFile 'w64devkit.exe'"
+          start /wait "" w64devkit.exe /S /D=%CD%\w64devkit
+          setx PATH "%PATH%;%CD%\w64devkit"
+      
+      - name: Download Raylib
         run: |
           curl -L -o raylib.zip https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_win64_mingw-w64.zip
           tar -xf raylib.zip
 
+      # Compilar nob
       - name: Compile nob
         run: gcc -o nob nob.c
         shell: bash
 
-      - name: Build project (Windows)
+      # Compilar tu proyecto usando nob
+      - name: Build Project
         run: ./nob
         shell: bash
 
+      # Subir binario como artifact
       - name: Upload Windows binary
         uses: actions/upload-artifact@v4
         with:
