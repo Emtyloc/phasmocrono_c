@@ -1,49 +1,66 @@
-name: Build Phasmocrono
+name: Build Project
 
 on:
   push:
-    branches: [ main ]
-  release:
-    types: [ created ]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-linux:
+  linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libraylib-dev
-
-      - name: Build (Linux)
+      - name: Install Linux dependencies
         run: |
-          gcc nob.c -o nob
-          ./nob
+          sudo apt update
+          sudo apt install -y build-essential git cmake libasound2-dev libx11-dev \
+            libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev
+          git clone --depth 1 https://github.com/raysan5/raylib.git
+          cd raylib/src
+          make PLATFORM=PLATFORM_DESKTOP
+          sudo make install
+          cd ../../
 
-      - uses: actions/upload-artifact@v4
+      - name: Compile nob
+        run: gcc -o nob nob.c
+
+      - name: Build project (Linux)
+        run: ./nob
+
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
         with:
           name: phasmocrono-linux
           path: phasmocrono
 
-  build-windows:
-    runs-on: ubuntu-latest
+  windows:
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Install mingw-w64
-        run: sudo apt-get update && sudo apt-get install -y mingw-w64
+      - name: Install MinGW-w64
+        run: choco install w64devkit -y
 
-      - name: Download Raylib (Windows)
+      - name: Download Raylib precompiled
         run: |
-          wget https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_win64_mingw.zip
-          unzip raylib-5.5_win64_mingw.zip -d raylib_win
+          curl -L -o raylib.zip https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_win64_mingw-w64.zip
+          tar -xf raylib.zip
 
-      - name: Build (Windows cross)
-        run: |
-          gcc nob.c -o nob
-          ./nob --win
+      - name: Compile nob
+        run: gcc -o nob nob.c
+        shell: bash
 
-      - uses: actions/upload-artifact@v4
+      - name: Build project (Windows)
+        run: ./nob
+        shell: bash
+
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v4
         with:
           name: phasmocrono-windows
           path: phasmocrono.exe
