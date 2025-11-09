@@ -13,15 +13,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Descargar y descomprimir Raylib
-      - name: Download and Extract Raylib
+      # Crear carpeta para Raylib y descargar ZIP
+      - name: Download Raylib
         run: |
+          mkdir raylib_win
           curl -L -o raylib.zip https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_win64_mingw-w64.zip
-          Expand-Archive raylib.zip
 
-      # Imprimir contenido de la carpeta para verificar paths
+      # Descomprimir Raylib en la carpeta raylib_win
+      - name: Extract Raylib
+        run: Expand-Archive -Path raylib.zip -DestinationPath raylib_win
+
+      # Listar todo dentro de raylib_win para verificar paths
       - name: List Raylib folder
-        run: dir raylib-5.5_win64_mingw-w64 /s
+        run: dir raylib_win /s
 
       # Compilar nob
       - name: Compile nob
