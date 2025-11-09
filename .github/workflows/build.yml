@@ -17,7 +17,6 @@ jobs:
         run: |
           curl -L -o raylib.zip https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_win64_mingw-w64.zip
           Expand-Archive raylib.zip
-          Rename-Item "raylib-5.5_win64_mingw-w64" "raylib_win"
 
       - name: Compile nob
         run: gcc -o nob nob.c
