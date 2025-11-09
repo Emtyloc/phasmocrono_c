@@ -11,9 +11,10 @@ int main(int argc, char **argv) {
     nob_cc_output(&cmd, "phasmocrono.exe");
     nob_cc_inputs(&cmd, "main.c");
     nob_cmd_append(&cmd,
-        "-Iraylib_win/include",
-        "-Lraylib_win/lib",
-        "-lraylib", "-lopengl32", "-lgdi32", "-lwinmm"
+        "-Iraylib-5.5_win64_mingw-w64/include",
+        "-Lraylib-5.5_win64_mingw-w64/lib",
+        "-lraylib",
+        "-lopengl32", "-lgdi32", "-lwinmm"
     );
     nob_log(NOB_INFO, "Compiling for Windows 🪟");
 #else
