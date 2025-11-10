@@ -6,18 +6,6 @@ int main(int argc, char **argv) {
 
     Nob_Cmd cmd = {0};
 
-#if defined(_WIN32)
-    nob_cc(&cmd);
-    nob_cc_output(&cmd, "phasmocrono.exe");
-    nob_cc_inputs(&cmd, "main.c");
-    nob_cmd_append(&cmd,
-        "-Iraylib-5.5_win64_mingw-w64/include",
-        "-Lraylib-5.5_win64_mingw-w64/lib",
-        "-lraylib",
-        "-lopengl32", "-lgdi32", "-lwinmm"
-    );
-    nob_log(NOB_INFO, "Compiling for Windows 🪟");
-#else
     nob_cc(&cmd);
     nob_cc_output(&cmd, "phasmocrono");
     nob_cc_inputs(&cmd, "main.c");
@@ -25,7 +13,6 @@ int main(int argc, char **argv) {
         "-lraylib", "-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11"
     );
     nob_log(NOB_INFO, "Compiling for Linux 🐧");
-#endif
 
     if (!nob_cmd_run(&cmd)) {
         nob_cmd_free(cmd);
