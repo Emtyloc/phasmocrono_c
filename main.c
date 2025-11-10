@@ -2,7 +2,6 @@
 #include "raylib.h"
 
 typedef struct {
-    int hours;
     int minutes;
     float seconds;
 } Time;
@@ -23,27 +22,37 @@ void reset(Time *time, bool *running)
 int main(int argc, char **argv)
 {
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TRANSPARENT);
-
+    
     const int DEFAULT_WINDOW_WIDTH = 200;
     const int DEFAULT_WINDOW_HEIGHT = 75;
     const int MONITOR_ID = 0;
-
+    
     InitWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "Phasmocrono");
+    
+    const char *icon_path = "./assets/icon.png";
+    Image icon = LoadImage(icon_path);
+    SetWindowIcon(icon);
+
     SetWindowState(FLAG_WINDOW_TOPMOST);
     SetExitKey(KEY_PAGE_UP);
-
+    
+    
     SetTargetFPS(30);
     SetWindowMonitor(MONITOR_ID);
-
+    
     int monitor_x = GetMonitorPosition(MONITOR_ID).x;
     int monitor_y = GetMonitorPosition(MONITOR_ID).y;
     int monitor_width = GetMonitorWidth(MONITOR_ID);
-
+    
     float scale = (float)monitor_width / 2560.0f;
-
+    
     int window_width = (int)(200 * scale);
     int window_height = (int)(75 * scale);
-    int font_size = (int)(40 * scale);
+    int font_size = (int)(60 * scale);
+    const float font_spacing = 1.0f * scale;
+
+    const char *font_path = "./assets/CHILLER.TTF";
+    Font chiller_font = LoadFontEx(font_path, font_size, NULL, 0);
 
     SetWindowSize(window_width, window_height);
     int x = monitor_x + (monitor_width - window_width) / 2;
@@ -80,6 +89,7 @@ int main(int argc, char **argv)
                 const float rest_seconds = time.seconds - 60.0f;
                 time.seconds = rest_seconds;
                 time.minutes++;
+                if (time.minutes > 99) reset(&time, &running);
             }
         }
         
@@ -92,24 +102,24 @@ int main(int argc, char **argv)
         TextAppend(time_text, ":", &position);
         TextAppend(time_text, time_s_text, &position);        
         
-        int textWidth = MeasureText(time_text, font_size);
+        Vector2 text_size = MeasureTextEx(chiller_font, time_text, font_size, font_spacing);
+        Vector2 text_pos = {
+            .x = (GetScreenWidth() - text_size.x) / 2,
+            .y = (GetScreenHeight() - text_size.y) / 2,
+        };
         
         // START RENDERING
         BeginDrawing();
-        ClearBackground(BLANK);
 
-        DrawText(
-            time_text,
-            (GetScreenWidth() - textWidth) / 2,
-            (GetScreenHeight() - font_size) / 2,
-            font_size,
-            RED
-        );
+        ClearBackground(BLANK);
+        DrawTextEx(chiller_font, time_text, text_pos, font_size, font_spacing, RAYWHITE);
 
         //DrawFPS(0, 0);
         EndDrawing();
     }
 
+    UnloadFont(chiller_font);
+    UnloadImage(icon);
     CloseWindow();
     return 0;
 }
