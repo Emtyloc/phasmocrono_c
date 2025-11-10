@@ -2,7 +2,10 @@
 #include "raylib.h"
 
 #ifdef _WIN32
-    #include <windows.h>  //GetAsyncKeyState()
+    typedef unsigned short WORD;
+    #define VK_END    0x23
+    #define VK_NEXT   0x22  // PAGE_DOWN
+    extern short __stdcall GetAsyncKeyState(int vKey);
 #endif
 
 typedef struct {
@@ -61,8 +64,6 @@ int main(int argc, char **argv)
     int y = monitor_y;
     SetWindowPosition(x, y);
 
-    
-    //setup crono
     Time time = {0};
     bool running = false;
 
@@ -71,20 +72,16 @@ int main(int argc, char **argv)
         float delta_time = GetFrameTime();
 
 #ifdef _WIN32
-        if (GetAsyncKeyState(VK_END) & 0x8000)      start_pause(&running);
-        if (GetAsyncKeyState(VK_NEXT) & 0x8000)     reset(&time, &running); // PAGE_DOWN = VK_NEXT
+        if (GetAsyncKeyState(VK_END) & 0x8000)  start_pause(&running);
+        if (GetAsyncKeyState(VK_NEXT) & 0x8000) reset(&time, &running);
 #else
         int key_pressed = GetKeyPressed();
         if (key_pressed)
         {
             switch (key_pressed)
             {
-                case KEY_END:
-                    start_pause(&running);
-                    break;
-                case KEY_PAGE_DOWN:
-                    reset(&time, &running);
-                    break;
+                case KEY_END:       start_pause(&running); break;
+                case KEY_PAGE_DOWN: reset(&time, &running); break;
             }
         }
 #endif
@@ -92,7 +89,7 @@ int main(int argc, char **argv)
         if (running)
         {
             time.seconds += delta_time;
-            if (time.seconds >= 60)
+            if (time.seconds >= 60.0f)
             {
                 time.seconds -= 60.0f;
                 time.minutes++;
@@ -115,13 +112,11 @@ int main(int argc, char **argv)
             .y = (GetScreenHeight() - text_size.y) / 2,
         };
 
-        // START RENDERING
         BeginDrawing();
 
         ClearBackground(BLANK);
         DrawTextEx(chiller_font, time_text, text_pos, font_size, font_spacing, RAYWHITE);
 
-        //DrawFPS(0, 0);
         EndDrawing();
     }
 
